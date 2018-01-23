@@ -25,7 +25,7 @@ int net_client_connect(char* addr, uint16_t port) {
     return 1;
 }
 
-Mario *net_receive_packet() {
+struct Mario *net_receive_packet() {
     char *server_reply = malloc(512);
     if (recv(net_socket, server_reply, sizeof(Packet), 0) == sizeof(Packet)) {
         char *buffer = malloc(512);
@@ -40,7 +40,7 @@ Mario *net_receive_packet() {
                 sscanf(received_data, "%i:%i:%i:%i:%i", &a1, &a2, &a3, &a4, &id);
                 SDL_Rect pos;
                 pos.x = a1-16;
-                Mario *enemy = malloc(sizeof(Mario));
+                struct Mario *enemy = malloc(sizeof(struct Mario));
                 Enemy_init(enemy,pos);
                 enemy->currentAnimation = a2;
                 enemy->currentFrame = a3;
@@ -55,7 +55,7 @@ Mario *net_receive_packet() {
             if(p->packet_id==2){
                 int a4, a1, a2, a3,id;
                 sscanf(received_data, "%i:%i:%i:%i:%i", &a1, &a2, &a3, &a4,&id);
-                Mario *hero = malloc(sizeof(Mario));
+                struct Mario *hero = malloc(sizeof(struct Mario));
                 Mario_init(hero);
                 hero->position.x = a1;
                 hero->position.y = a2;
@@ -90,7 +90,7 @@ void net_send_packet(char *packet, uint32_t length) {
     send(net_socket, packet, length, 0);
 }
 
-void net_send_mario(Mario *mario){
+void net_send_mario(struct Mario *mario){
     char *player = malloc(512);
     packer_pack_player(player,mario);
     char *packet = packet_create(2,512, player);

@@ -11,9 +11,9 @@ typedef struct {
     SDL_Surface * img;
 	SDL_Rect pos;
 	int ymax;
-	Mario * mario;
-	Mario ** enemies;
-    Mario ** players;
+    struct Mario * mario;
+    struct Mario ** enemies;
+    struct Mario ** players;
     int countOfEnemies;
 } JS_t;
 
@@ -22,10 +22,8 @@ void JS_update(state_t * s, Uint32 elapsedTime);
 void JS_handleEvent(state_t * s);
 void JS_draw(state_t * s, SDL_Surface * surface);
 void JS_clean(state_t * s);
-const int H = 15;
-const int W = 150;
 state_t *state;
-void ChangeEnemy(int id,Mario *enemy){
+void ChangeEnemy(int id,struct Mario *enemy){
     JS_t* js = state->data;
     js->enemies[id]->position = enemy->position;
     js->enemies[id]->currentFrame = enemy->currentFrame;
@@ -33,7 +31,7 @@ void ChangeEnemy(int id,Mario *enemy){
     js->enemies[id]->died = enemy->died;
 }
 
-void ChangePlayer(int id, Mario * hero){
+void ChangePlayer(int id, struct Mario * hero){
     JS_t* js = state->data;
     js->players[id]->position = hero->position;
     js->players[id]->currentFrame = hero->currentFrame;
@@ -42,7 +40,7 @@ void ChangePlayer(int id, Mario * hero){
 
 void receiver_thread() {
     while(1) {
-        Mario *p = net_receive_packet();
+        struct Mario *p = net_receive_packet();
         if (p == NULL) {
             return;
         }
@@ -79,14 +77,14 @@ void JS_update(state_t * s, Uint32 elapsedTime)
 {
 	JS_t * m = s->data;
     int won = 0;
-    for(int i = 0;i < MAX_CONNECTIONS;i++){
+    for(size_t i = 0;i < MAX_CONNECTIONS;i++){
         if(i!=m->mario->id){
             won += m->players[i]->won;
         }
     }
     won += m->mario->won;
     if(!won) {
-        for (int i = 0; i < m->countOfEnemies; ++i) {
+        for (size_t i = 0; i < m->countOfEnemies; ++i) {
             if (HasIntersection(m->enemies[i]->position, m->mario->position) && m->mario->deathTime == 0) {
                 if (m->mario->acceleration > 0 && m->mario->position.y - 183 < 0) {
                     m->enemies[i]->died = 1;
@@ -103,6 +101,11 @@ void JS_update(state_t * s, Uint32 elapsedTime)
 
 void JS_init(state_t * s)
 {
+    const FILE const *fp;
+    fp = fopen("../levels/level", "r");
+    size_t i = 0;
+    while (i != H && fgets(FirstLevelMap[i], W+2,fp)){i++;}
+    fclose(fp);
 	JS_t * data = malloc(sizeof(*data));
     data->fond = IMG_Load("../levels/1-1/view.png");
     data->img = IMG_Load("../images/klass.png");
@@ -110,9 +113,9 @@ void JS_init(state_t * s)
     SDL_Rect position;
     SDL_FillRect(data->fond, &r, 1);
     SDL_Surface *surface = IMG_Load("../images/Mario_tileset.png");
-    int i=0;
-    int j=0;
-    for (; i<H; i++) {
+    i = 0;
+    size_t j = 0;
+    for (; i < H; i++) {
         for (j = 0; j < W; j++) {
             position.x = (j * 16);
             position.y = (i * 16);
@@ -198,16 +201,16 @@ void JS_init(state_t * s)
     position.y = 0;
     position.x = 0;
 	data->enemies =  malloc(sizeof(*(data->mario))* data->countOfEnemies);
-    for(int k = 0;k < data->countOfEnemies;k++){
-        Mario *mario = net_receive_packet();
+    for(size_t k = 0;k < data->countOfEnemies;k++){
+        struct Mario *mario = net_receive_packet();
         data->enemies[mario->id] = mario;
         data->enemies[mario->id]->image = IMG_Load("../images/Mario_tileset.png");
         Mario_draw(data->enemies[mario->id],surface,position);
     }
     data->players = malloc(sizeof(*(data->mario))* (MAX_CONNECTIONS-1));
-    for(int k = 0;k < MAX_CONNECTIONS;k++){
+    for(size_t k = 0;k < MAX_CONNECTIONS;k++){
         if(data->mario->id!=k) {
-            Mario *mario = net_receive_packet();
+            struct Mario *mario = net_receive_packet();
             data->players[mario->id] = mario;
             data->players[mario->id]->image = IMG_Load("../images/mario.png");
             Mario_draw(data->players[mario->id], surface, position);
@@ -222,7 +225,7 @@ void JS_init(state_t * s)
 void JS_handleEvent(state_t * s)
 {
 	SDL_Event event;
-	int continuer = 1;
+	size_t continuer = 1;
 	JS_t * m = s->data;
 	
 	while(continuer && SDL_PollEvent(&event))
@@ -297,10 +300,10 @@ void JS_draw(state_t * s, SDL_Surface * surface)
 	JS_t * m = s->data;
 	SDL_BlitSurface(m->fond, &(m->pos), surface, NULL);
 	Mario_draw(m->mario, surface, m->pos);
-    for (int i = 0; i < m->countOfEnemies; ++i) {
+    for (size_t i = 0; i < m->countOfEnemies; ++i) {
         Mario_draw(m->enemies[i], surface, m->pos);
     }
-    for (int i = 0; i < MAX_CONNECTIONS; ++i) {
+    for (size_t i = 0; i < MAX_CONNECTIONS; ++i) {
         if(i!=m->mario->id)
             Mario_draw(m->players[i], surface, m->pos);
     }

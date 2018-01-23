@@ -12,10 +12,11 @@
 #include "packer.h"
 #include "../game/Enemy.h"
 #include "../game/Mario.h"
+#include "../game/JeuState.h"
 
 net_server_state net_server_status;
 net_client_descr_t clients[MAX_CONNECTIONS];
-Mario **enemies;
+struct Mario **enemies;
 int net_port_bind(uint16_t port) {
     struct sockaddr_in net_server;
     int net_socket;
@@ -37,10 +38,15 @@ int net_port_bind(uint16_t port) {
 }
 
 int net_server_start(uint16_t port) {
+    const FILE const *fp;
+    fp = fopen("../game/level", "r");
+    size_t i = 0;
+    while (i != H && fgets(FirstLevelMap[i], W+2,fp)){i++;}
+    fclose(fp);
     SDL_Rect position;
-    Mario** enemy =  malloc(sizeof(Mario**)* Enemies_count);
-    for(int i = 0;i < Enemies_count;i++){
-        enemy[i] = malloc((sizeof(Mario)));
+    struct Mario** enemy =  malloc(sizeof(struct Mario**)* Enemies_count);
+    for(size_t i = 0;i < Enemies_count;i++){
+        enemy[i] = malloc((sizeof(struct Mario)));
         enemy[i]->id = i;
         position.x = 750 + i*300;
         Enemy_init(enemy[i],position);
@@ -62,7 +68,7 @@ int net_server_start(uint16_t port) {
         pthread_t net_receive_thread;
 
         clients[clients_count].socket = net_new_socket;
-        clients[clients_count].mario = malloc(sizeof(Mario));
+        clients[clients_count].mario = malloc(sizeof(struct Mario));
         Mario_init(clients[clients_count].mario);
         clients[clients_count].mario->id = clients_count;
         clients[clients_count].mario->position.x = 16 + clients_count*26;
@@ -80,7 +86,7 @@ int net_server_start(uint16_t port) {
     pthread_t game_thread;
     pthread_create(&game_thread, NULL, (void *(*)(void *)) net_game_thread, clients);
     net_server_status = RUNNING;
-    for(int i = 0;i < Enemies_count;i++)
+    for(size_t i = 0;i < Enemies_count;i++)
         enemy[i]->lastUpdate = SDL_GetTicks();
     pthread_join(game_thread, NULL);
     return 0;
@@ -95,7 +101,7 @@ void net_server_sends(Packet* args,int socket) {
 }
 
 void net_game_thread(net_client_descr_t *clients) {
-    for(int i = 0;i < MAX_CONNECTIONS;i++){
+    for(size_t i = 0;i < MAX_CONNECTIONS;i++){
         char *player = malloc(512);
         packer_pack_player(player,clients[i].mario);
         Packet * packet = (Packet *) packet_create(2,512, player);
@@ -104,13 +110,13 @@ void net_game_thread(net_client_descr_t *clients) {
         free(player);
     }
     while(net_server_status != SHUTDOWN) {
-        for(int j = 0;j< Enemies_count;j++){
+        for(size_t j = 0;j< Enemies_count;j++){
             Uint32 currentTime = SDL_GetTicks();
             Uint32 elapsedTime = currentTime - enemies[j]->lastUpdate;
             Enemy_update(enemies[j],elapsedTime);
         }
-        for(int i = 0; i < MAX_CONNECTIONS; i++) {
-            for(int j = 0;j<Enemies_count;j++) {
+        for(size_t i = 0; i < MAX_CONNECTIONS; i++) {
+            for(size_t j = 0;j<Enemies_count;j++) {
                 char *enemy = malloc(512);
                 packer_pack_enemy(enemy,enemies[j]);
                 Packet * packet = (Packet *) packet_create(1,512, enemy);
@@ -118,7 +124,7 @@ void net_game_thread(net_client_descr_t *clients) {
                 free(packet);
                 free(enemy);
             }
-            for(int j = 0;j< MAX_CONNECTIONS;j++)
+            for(size_t j = 0;j< MAX_CONNECTIONS;j++)
                 if(i!=j) {
                     char *player = malloc(512);
                     packer_pack_player(player,clients[j].mario);

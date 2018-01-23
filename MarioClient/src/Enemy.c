@@ -2,7 +2,7 @@
 #include "include/Mario.h"
 #include "include/JeuState.h"
 #include "SDL/SDL_image.h"
-void Enemy_init(Mario * enemies, SDL_Rect offset)
+void Enemy_init(struct Mario * enemies, SDL_Rect offset)
 {
     SDL_Rect * frames = NULL;
     enemies->currentAnimation = WALKING;
@@ -16,8 +16,6 @@ void Enemy_init(Mario * enemies, SDL_Rect offset)
     enemies->position.w = 16;
     enemies->position.h = 16;
     enemies->died = 0;
-
-    /* WALKING_SMALL_RIGHT */
     frames = malloc(sizeof(*frames) * 2);
     frames[0].x = 0;
     frames[0].y = 0;
@@ -30,7 +28,6 @@ void Enemy_init(Mario * enemies, SDL_Rect offset)
     enemies->animation[WALKING].frames = frames;
     enemies->animation[WALKING].countFrame = 2;
     enemies->animation[WALKING].delay = 320;
-    /* DIED */
     frames = malloc(sizeof(*frames) * 1);
     frames[0].x = 57;
     frames[0].y = 0;
@@ -45,7 +42,7 @@ void Enemy_init(Mario * enemies, SDL_Rect offset)
     enemies->animation[DIED_ENEMY].delay = 280;
 }
 
-void Enemy_update(Mario * mario, Uint32 timeElapsed){
+void Enemy_update(struct Mario * mario, Uint32 timeElapsed){
     if(mario->died) {
         mario->currentAnimation = DIED_ENEMY;
 

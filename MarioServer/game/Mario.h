@@ -32,7 +32,7 @@ typedef struct {
 	Uint32 delay;
 } Animation;
 
-typedef struct {
+struct Mario {
 	SDL_Surface * image;
 	Animation animation[NUMBER_OF_ANIMATION];
 	int currentAnimation;
@@ -50,15 +50,15 @@ typedef struct {
     int died;
     int deathTime;
 	int id;
-} Mario;
+};
 
-void Mario_init(Mario * mario);
-void Mario_move_left(Mario * mario, int move);
-void Mario_move_right(Mario * mario, int move);
-void Mario_jump(Mario * mario);
-void Mario_down(Mario * mario,int down);
-void Mario_update(Mario * mario, Uint32 timeElapsed);
-void Mario_draw(Mario * mario, SDL_Surface * surface, SDL_Rect offset);
-void Mario_clean(Mario * mario);
-void Collision(Mario *mario,int coordinate);
+void Mario_init(struct Mario * mario);
+void Mario_move_left(struct Mario * mario, int move);
+void Mario_move_right(struct Mario * mario, int move);
+void Mario_jump(struct Mario * mario);
+void Mario_down(struct Mario * mario,int down);
+void Mario_update(struct Mario * mario, Uint32 timeElapsed);
+void Mario_draw(struct Mario * mario, SDL_Surface * surface, SDL_Rect offset);
+void Mario_clean(struct Mario * mario);
+void Collision(struct Mario *mario,int coordinate);
 #endif

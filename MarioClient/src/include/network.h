@@ -14,9 +14,9 @@ typedef struct Packet {
 
 int net_socket;
 int net_client_connect(char* addr, uint16_t port);
-Mario* net_receive_packet();
+struct Mario* net_receive_packet();
 char* packet_create(uint32_t packet_id, uint32_t data_length, char* data);
 void net_send_packet(char* packet, uint32_t length);
 void net_send_dead_enemy(int id);
-void net_send_mario(Mario *mario);
+void net_send_mario(struct Mario *mario);
 #endif //SI_CLIENT_NETWORK_H

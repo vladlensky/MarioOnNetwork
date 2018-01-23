@@ -10,7 +10,7 @@ typedef enum {RUNNING, SHUTDOWN} net_server_state;
 typedef struct net_client_descr_t {
     int socket;
     struct Queue *send;
-    Mario *mario;
+    struct Mario *mario;
 } net_client_descr_t;
 
 int net_port_bind(uint16_t port);

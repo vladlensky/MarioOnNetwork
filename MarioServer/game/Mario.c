@@ -3,7 +3,7 @@
 #include "Mario.h"
 #include "JeuState.h"
 
-void Mario_init(Mario * mario)
+void Mario_init(struct Mario * mario)
 {
     SDL_Rect * frames = NULL;
     mario->currentAnimation = IDLE_SMALL_RIGHT;
@@ -103,7 +103,7 @@ void Mario_init(Mario * mario)
     mario->animation[DIED_ENEMY].delay = 200;
 }
 
-void Mario_move_left(Mario * mario, int move)
+void Mario_move_left(struct Mario * mario, int move)
 {
     if(mario->died){
         return;
@@ -132,7 +132,7 @@ void Mario_move_left(Mario * mario, int move)
 //    if(mario->type==0)
 //        return;
 //}
-void Mario_jump(Mario *mario){
+void Mario_jump(struct Mario *mario){
     if(mario->died){
         return;
     }
@@ -141,7 +141,7 @@ void Mario_jump(Mario *mario){
     mario->onGround = 0;
     mario->acceleration=-0.48;
 }
-void Mario_move_right(Mario * mario, int move)
+void Mario_move_right(struct Mario * mario, int move)
 {
     if(mario->died){
         return;
@@ -165,7 +165,7 @@ void Mario_move_right(Mario * mario, int move)
         }
     }
 }
-void checkIsFalling(Mario *mario){
+void checkIsFalling(struct Mario *mario){
     int k = mario->position.x/16;
     int j = (mario->position.x+15)/16;
     int i = (mario->position.y+16)/16;
@@ -179,7 +179,7 @@ void checkIsFalling(Mario *mario){
     mario->acceleration = 0.02;
 }
 
-void Mario_update(Mario * mario, Uint32 timeElapsed)
+void Mario_update(struct Mario * mario, Uint32 timeElapsed)
 {
     if(mario->died){
         mario->currentAnimation = DIED_ENEMY;
@@ -252,7 +252,7 @@ void Mario_update(Mario * mario, Uint32 timeElapsed)
     if(mario->onGround) checkIsFalling(mario);
 }
 
-void Mario_draw(Mario * mario, SDL_Surface * surface, SDL_Rect offset)
+void Mario_draw(struct Mario * mario, SDL_Surface * surface, SDL_Rect offset)
 {
     int cf = mario->currentFrame;
     SDL_Rect tmp_pos = mario->position;
@@ -261,12 +261,12 @@ void Mario_draw(Mario * mario, SDL_Surface * surface, SDL_Rect offset)
     SDL_BlitSurface(mario->image, &(mario->animation[mario->currentAnimation].frames[cf]), surface, &tmp_pos);
 }
 
-void Mario_clean(Mario * mario)
+void Mario_clean(struct Mario * mario)
 {
     SDL_FreeSurface(mario->image);
     free(mario->animation[IDLE_SMALL_RIGHT].frames);
 }
-void Collision(Mario *mario,int coordinate){
+void Collision(struct Mario *mario,int coordinate){
     int i;
     int j;
     int enemy = 0;

@@ -3,7 +3,7 @@
 
 #include "../game/Mario.h"
 
-int packer_pack_player(char* buffer, Mario* p);
-int packer_pack_enemy(char* buffer, Mario* e);
+int packer_pack_player(char* buffer, struct Mario* p);
+int packer_pack_enemy(char* buffer, struct Mario* e);
 
 #endif // NETWORK_PACKER_H
